@@ -11,6 +11,9 @@ COPY fitnessplanner/src src
 RUN chmod +x mvnw
 RUN ./mvnw clean package -DskipTests
 
+# Find and copy the jar file to a known location
+RUN mkdir -p target && cp fitnessplanner/target/*.jar target/app.jar || cp target/*.jar target/app.jar
+
 EXPOSE 8080
 
-CMD ["java", "-jar", "target/*.jar"]
+CMD ["java", "-jar", "target/app.jar"]

@@ -2,10 +2,9 @@ FROM amazoncorretto:17-alpine
 
 WORKDIR /app
 
-# Copy everything from the fitnessplanner folder
+# Copy from the fitnessplanner subfolder
 COPY fitnessplanner/.mvn .mvn
 COPY fitnessplanner/mvnw .
-COPY fitnessplanner/mvnw.cmd .
 COPY fitnessplanner/pom.xml .
 COPY fitnessplanner/src src
 

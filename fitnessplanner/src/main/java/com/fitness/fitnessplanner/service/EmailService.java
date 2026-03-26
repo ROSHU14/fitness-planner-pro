@@ -24,7 +24,6 @@ public class EmailService {
     @Autowired
     private UserService userService;
 
-    // Send weekly reports every Monday at 9 AM
     @Scheduled(cron = "0 0 9 * * MON")
     public void sendWeeklyReports() {
         System.out.println("📧 Starting weekly email reports...");
@@ -72,7 +71,7 @@ public class EmailService {
                 "✅ Track water intake, sleep, and steps\n" +
                 "✅ Get personalized diet and exercise plans\n" +
                 "✅ Earn achievements and maintain streaks\n\n" +
-                "🔐 Login here: http://localhost:8080/login.html\n\n" +
+                "🔐 Login here: https://fitness-planner-pro.onrender.com/login.html\n\n" +
                 "💡 Pro Tip: Log your first workout today to start your streak!\n\n" +
                 "Stay consistent and you'll see amazing results!\n\n" +
                 "Best regards,\n" +
@@ -101,7 +100,7 @@ public class EmailService {
         message.setText("Hi " + user.getName() + ",\n\n" +
                 randomQuote + "\n\n" +
                 "Remember: Every workout brings you one step closer to your goal!\n\n" +
-                "Log in today and make progress: http://localhost:8080/login.html\n\n" +
+                "Log in today and make progress: https://fitness-planner-pro.onrender.com/login.html\n\n" +
                 "Stay strong! 💪\n\n" +
                 "Fitness Planner Pro Team");
 
@@ -132,18 +131,17 @@ public class EmailService {
                     "• Current Streak: " + streak.get("currentStreak") + " days\n" +
                     "• Longest Streak: " + streak.get("longestStreak") + " days\n\n" +
                     "💪 Keep up the great work! Every day counts.\n\n" +
-                    "🔐 View your full report: http://localhost:8080/login.html\n\n" +
+                    "🔐 View your full report: https://fitness-planner-pro.onrender.com/login.html\n\n" +
                     "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
                     "Best regards,\n" +
                     "Fitness Planner Pro Team 💪";
         } catch (Exception e) {
-            // Fallback if stats not available
             return "Hi " + user.getName() + ",\n\n" +
                     "📊 Here's your weekly fitness summary:\n" +
                     "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n" +
                     "Keep logging your workouts and meals to see detailed stats!\n\n" +
                     "💪 Every workout brings you closer to your goal!\n\n" +
-                    "🔐 Login here: http://localhost:8080/login.html\n\n" +
+                    "🔐 Login here: https://fitness-planner-pro.onrender.com/login.html\n\n" +
                     "Best regards,\n" +
                     "Fitness Planner Pro Team 💪";
         }

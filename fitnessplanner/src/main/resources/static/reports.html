@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - Fitness Planner Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .sidebar-item.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .sidebar-item:hover:not(.active) { background: #f3f4f6; }
+        .dark { background-color: #1a202c; }
+        .dark .bg-white { background-color: #2d3748; }
+        .dark .text-gray-800 { color: #f7fafc; }
+        .dark .text-gray-600 { color: #cbd5e0; }
+        .dark .border { border-color: #4a5568; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .animate-spin { animation: spin 1s linear infinite; }
+        .report-card { transition: all 0.3s ease; }
+        .report-card:hover { transform: translateY(-2px); }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+<div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="w-64 bg-white dark:bg-gray-800 shadow-lg fixed h-full overflow-y-auto">
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center space-x-2">
+                <span class="text-3xl">💪</span>
+                <h1 class="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Fitness Planner Pro</h1>
+            </div>
+        </div>
+        <nav class="p-4 space-y-1">
+            <a href="/dashboard.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg transition"><i class="fas fa-tachometer-alt w-5"></i><span>Dashboard</span></a>
+            <a href="/workouts.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg transition"><i class="fas fa-dumbbell w-5"></i><span>Workouts</span></a>
+            <a href="/nutrition.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg transition"><i class="fas fa-apple-alt w-5"></i><span>Nutrition</span></a>
+            <a href="/progress.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg transition"><i class="fas fa-chart-line w-5"></i><span>Progress</span></a>
+            <a href="/reports.html" class="sidebar-item active flex items-center space-x-3 px-4 py-3 rounded-lg transition"><i class="fas fa-file-alt w-5"></i><span>Reports</span></a>
+            <a href="/achievements.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg transition"><i class="fas fa-trophy w-5"></i><span>Achievements</span></a>
+            <a href="/settings.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg transition"><i class="fas fa-cog w-5"></i><span>Settings</span></a>
+        </nav>
+        <div class="absolute bottom-0 w-64 p-4 border-t border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2"><i class="fas fa-user-circle text-2xl text-gray-600 dark:text-gray-400"></i><span id="sidebarUserName" class="text-sm text-gray-700 dark:text-gray-300">User</span></div>
+                <button onclick="logout()" class="text-red-500 hover:text-red-600 transition"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
+            <button onclick="toggleDarkMode()" id="darkModeToggle" class="mt-3 w-full text-left text-sm text-gray-500 dark:text-gray-400 hover:text-purple-600 transition"><i class="fas fa-moon mr-2"></i> Dark Mode</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="ml-64 flex-1 overflow-y-auto">
+        <div class="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-10">
+            <div class="flex justify-between items-center px-8 py-4">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white">📄 Reports</h2>
+                <div class="flex items-center space-x-4">
+                    <span class="bg-orange-100 dark:bg-orange-900 text-orange-600 dark:text-orange-300 px-3 py-1 rounded-full text-sm font-bold">🔥 <span id="streakCount">0</span> day streak</span>
+                    <span id="userName" class="text-gray-700 dark:text-gray-300 font-medium"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-8">
+            <!-- Loading State -->
+            <div id="loadingState" class="text-center py-12">
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                <p class="mt-4 text-gray-600">Loading your weekly report...</p>
+            </div>
+
+            <!-- Report Content -->
+            <div id="reportContent" class="hidden">
+                <!-- Report Card -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg mb-8 overflow-hidden">
+                    <div class="bg-gradient-to-r from-purple-600 to-pink-600 p-4">
+                        <h3 class="text-xl font-bold text-white">📊 Weekly Progress Report</h3>
+                    </div>
+                    <div class="p-6">
+                        <div id="reportData" class="space-y-4">
+                            <!-- Report data will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    <button onclick="refreshReport()" class="bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition flex items-center justify-center gap-2">
+                        <i class="fas fa-sync-alt"></i> Generate New Report
+                    </button>
+                    <button onclick="exportReport()" class="bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-2">
+                        <i class="fas fa-file-pdf"></i> Export as PDF
+                    </button>
+                </div>
+
+                <!-- Tips Card -->
+                <div class="bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900 rounded-xl p-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <i class="fas fa-lightbulb text-yellow-500 text-2xl"></i>
+                        <h3 class="text-lg font-bold text-purple-800 dark:text-purple-200">💡 Pro Tips</h3>
+                    </div>
+                    <p class="text-purple-700 dark:text-purple-300">Regular reports help you track progress and stay motivated. Generate weekly reports to see your improvements over time and adjust your goals accordingly!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ========== GLOBAL VARIABLES ==========
+    const API_BASE_URL = '/api';
+    let token = localStorage.getItem('token');
+
+    // ========== CHECK AUTH ==========
+    if (!token) {
+        window.location.href = '/login.html';
+    }
+
+    // ========== LOGOUT ==========
+    function logout() {
+        localStorage.clear();
+        window.location.href = '/index.html';
+    }
+
+    // ========== DARK MODE ==========
+    function toggleDarkMode() {
+        if (document.documentElement.classList.contains('dark')) {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('darkMode', 'false');
+            document.getElementById('darkModeToggle').innerHTML = '<i class="fas fa-moon mr-2"></i> Dark Mode';
+        } else {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('darkMode', 'true');
+            document.getElementById('darkModeToggle').innerHTML = '<i class="fas fa-sun mr-2"></i> Light Mode';
+        }
+    }
+
+    if (localStorage.getItem('darkMode') === 'true') {
+        document.documentElement.classList.add('dark');
+        document.getElementById('darkModeToggle').innerHTML = '<i class="fas fa-sun mr-2"></i> Light Mode';
+    }
+
+    // ========== USER INFO ==========
+    const userEmail = localStorage.getItem('userEmail');
+    if (userEmail) {
+        const name = userEmail.split('@')[0];
+        document.getElementById('userName').textContent = name;
+        document.getElementById('sidebarUserName').textContent = name;
+    }
+
+    // ========== LOAD STREAK ==========
+    async function loadStreak() {
+        try {
+            const res = await fetch(`${API_BASE_URL}/streak`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('streakCount').textContent = data.currentStreak;
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    // ========== LOAD REPORT ==========
+    async function loadReport() {
+        const loadingState = document.getElementById('loadingState');
+        const reportContent = document.getElementById('reportContent');
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/report/weekly`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                const report = result.data;
+
+                // Format dates
+                const startDate = new Date(report.period.split(' to ')[0]);
+                const endDate = new Date(report.period.split(' to ')[1]);
+                const formattedPeriod = `${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+
+                // Determine color for weight change
+                let weightChangeColor = 'text-gray-600';
+                let weightChangeIcon = '⚖️';
+                if (report.weightChange < 0) {
+                    weightChangeColor = 'text-green-600';
+                    weightChangeIcon = '📉';
+                } else if (report.weightChange > 0) {
+                    weightChangeColor = 'text-orange-600';
+                    weightChangeIcon = '📈';
+                }
+
+                // Build report HTML
+                const reportHTML = `
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
+                        <div class="text-center mb-6">
+                            <div class="text-2xl font-bold text-purple-600">📅 ${formattedPeriod}</div>
+                            <p class="text-gray-500 dark:text-gray-400 mt-1">Weekly Progress Summary</p>
+                        </div>
+
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                            <div class="text-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+                                <div class="text-3xl mb-2">🏋️</div>
+                                <div class="text-2xl font-bold text-purple-600">${report.workoutsThisWeek}</div>
+                                <div class="text-xs text-gray-500">Workouts</div>
+                            </div>
+                            <div class="text-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+                                <div class="text-3xl mb-2">🍽️</div>
+                                <div class="text-2xl font-bold text-purple-600">${report.totalCaloriesThisWeek.toLocaleString()}</div>
+                                <div class="text-xs text-gray-500">Calories</div>
+                            </div>
+                            <div class="text-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+                                <div class="text-3xl mb-2">👣</div>
+                                <div class="text-2xl font-bold text-purple-600">${report.totalStepsThisWeek.toLocaleString()}</div>
+                                <div class="text-xs text-gray-500">Steps</div>
+                            </div>
+                            <div class="text-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+                                <div class="text-3xl mb-2">😴</div>
+                                <div class="text-2xl font-bold text-purple-600">${report.averageSleepHours}</div>
+                                <div class="text-xs text-gray-500">Sleep (hrs)</div>
+                            </div>
+                        </div>
+
+                        ${report.startWeight ? `
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 mb-6">
+                            <h4 class="font-bold text-gray-800 dark:text-white mb-3">⚖️ Weight Progress</h4>
+                            <div class="flex justify-between items-center">
+                                <div class="text-center">
+                                    <div class="text-sm text-gray-500">Starting</div>
+                                    <div class="text-xl font-bold text-gray-800 dark:text-white">${report.startWeight} kg</div>
+                                </div>
+                                <div class="text-2xl text-gray-400">→</div>
+                                <div class="text-center">
+                                    <div class="text-sm text-gray-500">Current</div>
+                                    <div class="text-xl font-bold text-gray-800 dark:text-white">${report.currentWeight} kg</div>
+                                </div>
+                                <div class="text-center ${weightChangeColor}">
+                                    <div class="text-sm">Change</div>
+                                    <div class="text-xl font-bold">${weightChangeIcon} ${report.weightChange > 0 ? '+' : ''}${report.weightChange} kg</div>
+                                </div>
+                            </div>
+                        </div>
+                        ` : ''}
+
+                        <div class="bg-purple-50 dark:bg-purple-900/30 rounded-lg p-4">
+                            <div class="flex items-center gap-2 mb-2">
+                                <i class="fas fa-quote-left text-purple-600"></i>
+                                <span class="font-semibold text-purple-700 dark:text-purple-300">Motivational Message</span>
+                            </div>
+                            <p class="text-purple-700 dark:text-purple-300 text-lg font-medium">${report.motivationalMessage}</p>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('reportData').innerHTML = reportHTML;
+                loadingState.classList.add('hidden');
+                reportContent.classList.remove('hidden');
+            } else {
+                throw new Error('Failed to load report');
+            }
+        } catch(e) {
+            console.error('Report error:', e);
+            loadingState.innerHTML = `
+                <div class="text-center py-12">
+                    <div class="text-red-500 text-5xl mb-4">⚠️</div>
+                    <p class="text-gray-600">Failed to load report. Please refresh.</p>
+                    <button onclick="location.reload()" class="mt-4 bg-purple-600 text-white px-6 py-2 rounded-lg">Retry</button>
+                </div>
+            `;
+        }
+    }
+
+    // ========== REFRESH REPORT ==========
+    async function refreshReport() {
+        const loadingState = document.getElementById('loadingState');
+        const reportContent = document.getElementById('reportContent');
+
+        loadingState.classList.remove('hidden');
+        reportContent.classList.add('hidden');
+        loadingState.innerHTML = `
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+            <p class="mt-4 text-gray-600">Generating fresh report...</p>
+        `;
+
+        await loadReport();
+    }
+
+    // ========== EXPORT PDF ==========
+    async function exportReport() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/report/export?token=${token}`);
+            const html = await response.text();
+
+            // Create a new window and print
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(html);
+            printWindow.document.close();
+            printWindow.print();
+        } catch(e) {
+            console.error('Export error:', e);
+            alert('Error generating PDF. Please try again.');
+        }
+    }
+
+    // ========== INITIALIZE ==========
+    loadReport();
+    loadStreak();
+</script>
+</body>
+</html>

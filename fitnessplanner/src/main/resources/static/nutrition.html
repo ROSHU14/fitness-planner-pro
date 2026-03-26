@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nutrition - Fitness Planner Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .sidebar-item.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .sidebar-item:hover:not(.active) { background: #f3f4f6; }
+        .dark { background-color: #1a202c; }
+        .dark .bg-white { background-color: #2d3748; }
+        .dark .text-gray-800 { color: #f7fafc; }
+        .dark .text-gray-600 { color: #cbd5e0; }
+        .dark .border { border-color: #4a5568; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .animate-spin { animation: spin 1s linear infinite; }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+<div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="w-64 bg-white dark:bg-gray-800 shadow-lg fixed h-full overflow-y-auto">
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center space-x-2">
+                <span class="text-3xl">💪</span>
+                <h1 class="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Fitness Planner Pro</h1>
+            </div>
+        </div>
+        <nav class="p-4 space-y-1">
+            <a href="/dashboard.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg transition"><i class="fas fa-tachometer-alt w-5"></i><span>Dashboard</span></a>
+            <a href="/workouts.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg transition"><i class="fas fa-dumbbell w-5"></i><span>Workouts</span></a>
+            <a href="/nutrition.html" class="sidebar-item active flex items-center space-x-3 px-4 py-3 rounded-lg transition"><i class="fas fa-apple-alt w-5"></i><span>Nutrition</span></a>
+            <a href="/progress.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg transition"><i class="fas fa-chart-line w-5"></i><span>Progress</span></a>
+            <a href="/reports.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg transition"><i class="fas fa-file-alt w-5"></i><span>Reports</span></a>
+            <a href="/achievements.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg transition"><i class="fas fa-trophy w-5"></i><span>Achievements</span></a>
+            <a href="/settings.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg transition"><i class="fas fa-cog w-5"></i><span>Settings</span></a>
+        </nav>
+        <div class="absolute bottom-0 w-64 p-4 border-t border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2"><i class="fas fa-user-circle text-2xl text-gray-600 dark:text-gray-400"></i><span id="sidebarUserName" class="text-sm text-gray-700 dark:text-gray-300">User</span></div>
+                <button onclick="logout()" class="text-red-500 hover:text-red-600 transition"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
+            <button onclick="toggleDarkMode()" id="darkModeToggle" class="mt-3 w-full text-left text-sm text-gray-500 dark:text-gray-400 hover:text-purple-600 transition"><i class="fas fa-moon mr-2"></i> Dark Mode</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="ml-64 flex-1 overflow-y-auto">
+        <div class="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-10">
+            <div class="flex justify-between items-center px-8 py-4">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white">🍽️ Nutrition</h2>
+                <div class="flex items-center space-x-4">
+                    <span class="bg-orange-100 dark:bg-orange-900 text-orange-600 dark:text-orange-300 px-3 py-1 rounded-full text-sm font-bold">🔥 <span id="streakCount">0</span> day streak</span>
+                    <span id="userName" class="text-gray-700 dark:text-gray-300 font-medium"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-8">
+            <!-- Loading State -->
+            <div id="loadingState" class="text-center py-12">
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                <p class="mt-4 text-gray-600">Loading your personalized diet plan...</p>
+            </div>
+
+            <!-- Content -->
+            <div id="contentState" class="hidden">
+                <!-- Diet Plan Card -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg mb-8 overflow-hidden">
+                    <div class="bg-gradient-to-r from-purple-600 to-pink-600 p-4">
+                        <h3 class="text-xl font-bold text-white">🍽️ Your Personalized Diet Plan</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="dietPlanContainer">
+                            <!-- Diet plan will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nutrition Breakdown -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg mb-8 overflow-hidden">
+                    <div class="bg-gradient-to-r from-purple-600 to-pink-600 p-4">
+                        <h3 class="text-xl font-bold text-white">📊 Daily Nutrition Breakdown</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="nutritionBreakdown">
+                            <!-- Nutrition will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Meal Logger -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg mb-8 overflow-hidden">
+                    <div class="bg-gradient-to-r from-purple-600 to-pink-600 p-4">
+                        <h3 class="text-xl font-bold text-white">📝 Log Your Meal</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <button onclick="logMeal('Breakfast')" class="bg-purple-100 dark:bg-gray-700 text-purple-600 dark:text-purple-400 p-4 rounded-lg hover:bg-purple-200 transition">
+                                🍳 Breakfast
+                            </button>
+                            <button onclick="logMeal('Lunch')" class="bg-purple-100 dark:bg-gray-700 text-purple-600 dark:text-purple-400 p-4 rounded-lg hover:bg-purple-200 transition">
+                                🥗 Lunch
+                            </button>
+                            <button onclick="logMeal('Dinner')" class="bg-purple-100 dark:bg-gray-700 text-purple-600 dark:text-purple-400 p-4 rounded-lg hover:bg-purple-200 transition">
+                                🍽️ Dinner
+                            </button>
+                            <button onclick="logMeal('Snack')" class="bg-purple-100 dark:bg-gray-700 text-purple-600 dark:text-purple-400 p-4 rounded-lg hover:bg-purple-200 transition">
+                                🍎 Snack
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Water Tracker -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+                    <div class="bg-gradient-to-r from-purple-600 to-pink-600 p-4">
+                        <h3 class="text-xl font-bold text-white">💧 Water Intake</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-purple-600" id="waterLiters">0.0</div>
+                                <div class="text-gray-600 dark:text-gray-400">Liters Today</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-purple-600">3.0</div>
+                                <div class="text-gray-600 dark:text-gray-400">Daily Goal</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-purple-600" id="waterPercent">0</div>
+                                <div class="text-gray-600 dark:text-gray-400">% Complete</div>
+                            </div>
+                        </div>
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 mb-4">
+                            <div id="waterBar" class="bg-purple-600 rounded-full h-4 transition-all" style="width: 0%"></div>
+                        </div>
+                        <div class="grid grid-cols-4 gap-3">
+                            <button onclick="addWater(0.25)" class="bg-purple-100 dark:bg-gray-700 text-purple-600 dark:text-purple-400 py-2 rounded-lg hover:bg-purple-200 transition">250ml</button>
+                            <button onclick="addWater(0.5)" class="bg-purple-100 dark:bg-gray-700 text-purple-600 dark:text-purple-400 py-2 rounded-lg hover:bg-purple-200 transition">500ml</button>
+                            <button onclick="addWater(1.0)" class="bg-purple-100 dark:bg-gray-700 text-purple-600 dark:text-purple-400 py-2 rounded-lg hover:bg-purple-200 transition">1L</button>
+                            <button onclick="resetWater()" class="bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400 py-2 rounded-lg hover:bg-red-200 transition">Reset</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ========== GLOBAL VARIABLES ==========
+    const API_BASE_URL = '/api';
+
+    // ========== LOGOUT ==========
+    function logout() {
+        localStorage.clear();
+        window.location.href = '/index.html';
+    }
+
+    // ========== DARK MODE ==========
+    function toggleDarkMode() {
+        if (document.documentElement.classList.contains('dark')) {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('darkMode', 'false');
+            document.getElementById('darkModeToggle').innerHTML = '<i class="fas fa-moon mr-2"></i> Dark Mode';
+        } else {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('darkMode', 'true');
+            document.getElementById('darkModeToggle').innerHTML = '<i class="fas fa-sun mr-2"></i> Light Mode';
+        }
+    }
+
+    if (localStorage.getItem('darkMode') === 'true') {
+        document.documentElement.classList.add('dark');
+        document.getElementById('darkModeToggle').innerHTML = '<i class="fas fa-sun mr-2"></i> Light Mode';
+    }
+
+    // ========== USER INFO ==========
+    const userEmail = localStorage.getItem('userEmail');
+    if (userEmail) {
+        const name = userEmail.split('@')[0];
+        document.getElementById('userName').textContent = name;
+        document.getElementById('sidebarUserName').textContent = name;
+    }
+
+    // ========== STREAK ==========
+    async function loadStreak() {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE_URL}/streak`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('streakCount').textContent = data.currentStreak;
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    // ========== WATER TRACKER ==========
+    async function loadWater() {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE_URL}/water/stats`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (data.success) {
+                const liters = data.data.today;
+                const percent = Math.min(100, (liters / 3) * 100);
+                document.getElementById('waterLiters').textContent = liters.toFixed(1);
+                document.getElementById('waterPercent').textContent = Math.round(percent);
+                document.getElementById('waterBar').style.width = percent + '%';
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    async function addWater(liters) {
+        try {
+            const token = localStorage.getItem('token');
+            await fetch(`${API_BASE_URL}/water/add`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ liters: liters })
+            });
+            loadWater();
+            alert(`Added ${liters}L of water! 💧`);
+        } catch(e) { alert('Error adding water'); }
+    }
+
+    async function resetWater() {
+        if (confirm('Reset today\'s water intake?')) {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${API_BASE_URL}/water/stats`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success && data.data.today > 0) {
+                    await fetch(`${API_BASE_URL}/water/add`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ liters: -data.data.today })
+                    });
+                }
+                loadWater();
+                alert('Water reset!');
+            } catch(e) { alert('Error'); }
+        }
+    }
+
+    // ========== MEAL LOGGER ==========
+    async function logMeal(type) {
+        const food = prompt('Enter food name:', 'Healthy Meal');
+        if (!food) return;
+        const calories = prompt('Enter calories:', '500');
+        if (!calories) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/meals/log`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    mealType: type,
+                    foodName: food,
+                    quantity: 1,
+                    unit: 'serving',
+                    calories: parseInt(calories)
+                })
+            });
+            const data = await response.json();
+            if (data.success) {
+                alert(`✅ ${food} (${calories} kcal) logged for ${type}! 🍽️`);
+            } else {
+                alert('Error logging meal: ' + (data.error || 'Unknown error'));
+            }
+        } catch(e) {
+            console.error('Meal log error:', e);
+            alert('Error logging meal. Check console.');
+        }
+    }
+
+    // ========== LOAD DIET PLAN ==========
+    async function loadDietPlan() {
+        const loadingState = document.getElementById('loadingState');
+        const contentState = document.getElementById('contentState');
+        const token = localStorage.getItem('token');
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/fitness/plan`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const result = await res.json();
+
+            if (result.success) {
+                const data = result.data;
+                const diet = data.dietPlan;
+
+                // Display Diet Plan
+                document.getElementById('dietPlanContainer').innerHTML = `
+                    <div class="p-4 bg-purple-50 dark:bg-gray-700 rounded-lg">
+                        <h4 class="font-bold text-purple-600 dark:text-purple-400 mb-2">🍳 Breakfast</h4>
+                        <p class="text-gray-700 dark:text-gray-300">${diet.breakfast}</p>
+                    </div>
+                    <div class="p-4 bg-purple-50 dark:bg-gray-700 rounded-lg">
+                        <h4 class="font-bold text-purple-600 dark:text-purple-400 mb-2">🥗 Lunch</h4>
+                        <p class="text-gray-700 dark:text-gray-300">${diet.lunch}</p>
+                    </div>
+                    <div class="p-4 bg-purple-50 dark:bg-gray-700 rounded-lg">
+                        <h4 class="font-bold text-purple-600 dark:text-purple-400 mb-2">🍽️ Dinner</h4>
+                        <p class="text-gray-700 dark:text-gray-300">${diet.dinner}</p>
+                    </div>
+                    <div class="p-4 bg-purple-50 dark:bg-gray-700 rounded-lg">
+                        <h4 class="font-bold text-purple-600 dark:text-purple-400 mb-2">🍎 Snacks</h4>
+                        <p class="text-gray-700 dark:text-gray-300">${diet.snacks}</p>
+                    </div>
+                    <div class="md:col-span-2 p-4 bg-purple-100 dark:bg-gray-700 rounded-lg">
+                        <h4 class="font-bold text-purple-600 dark:text-purple-400 mb-2">📝 Description</h4>
+                        <p class="text-gray-700 dark:text-gray-300">${diet.description}</p>
+                    </div>
+                `;
+
+                // Display Nutrition Info
+                if (data.nutritionInfo) {
+                    const n = data.nutritionInfo;
+                    document.getElementById('nutritionBreakdown').innerHTML = `
+                        <div class="text-center p-4 bg-purple-50 dark:bg-gray-700 rounded-lg">
+                            <div class="text-2xl font-bold text-purple-600">${Math.round(n.protein)}g</div>
+                            <div class="text-gray-600 dark:text-gray-400 text-sm">Protein</div>
+                        </div>
+                        <div class="text-center p-4 bg-purple-50 dark:bg-gray-700 rounded-lg">
+                            <div class="text-2xl font-bold text-purple-600">${Math.round(n.carbs)}g</div>
+                            <div class="text-gray-600 dark:text-gray-400 text-sm">Carbohydrates</div>
+                        </div>
+                        <div class="text-center p-4 bg-purple-50 dark:bg-gray-700 rounded-lg">
+                            <div class="text-2xl font-bold text-purple-600">${Math.round(n.fats)}g</div>
+                            <div class="text-gray-600 dark:text-gray-400 text-sm">Fats</div>
+                        </div>
+                        <div class="text-center p-4 bg-purple-50 dark:bg-gray-700 rounded-lg">
+                            <div class="text-2xl font-bold text-purple-600">${n.fiber}g</div>
+                            <div class="text-gray-600 dark:text-gray-400 text-sm">Fiber</div>
+                        </div>
+                    `;
+                }
+
+                loadingState.classList.add('hidden');
+                contentState.classList.remove('hidden');
+            } else {
+                throw new Error('Failed to load diet plan');
+            }
+        } catch(e) {
+            console.error('Error:', e);
+            loadingState.innerHTML = `
+                <div class="text-center py-12">
+                    <div class="text-red-500 text-5xl mb-4">⚠️</div>
+                    <p class="text-gray-600">Failed to load diet plan. Please refresh.</p>
+                    <button onclick="location.reload()" class="mt-4 bg-purple-600 text-white px-6 py-2 rounded-lg">Retry</button>
+                </div>
+            `;
+        }
+    }
+
+    // ========== INITIALIZE ==========
+    loadDietPlan();
+    loadWater();
+    loadStreak();
+</script>
+</body>
+</html>

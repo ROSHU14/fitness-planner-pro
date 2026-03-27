@@ -31,34 +31,38 @@ public class AuthController {
     @Autowired
     private JwtService jwtService;
 
-    // ========== ADD THIS - Inject EmailService ==========
     @Autowired
     private EmailService emailService;
-    // ====================================================
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@Valid @RequestBody SignupRequest request) {
         try {
-            User user = userService.registerUser(request);
+            System.out.println("Signup attempt for: " + request.getEmail());
 
-            // ========== ADD THIS - Send Welcome Email ==========
-            try {
-                emailService.sendWelcomeEmail(user);
-                System.out.println("✅ Welcome email sent to: " + user.getEmail());
-            } catch (Exception e) {
-                System.err.println("❌ Failed to send welcome email: " + e.getMessage());
-                // Don't fail signup if email fails
-            }
-            // ==================================================
+            User user = userService.registerUser(request);
+            System.out.println("User registered: " + user.getEmail());
+
+            // Send email in separate thread to avoid delay
+            new Thread(() -> {
+                try {
+                    emailService.sendWelcomeEmail(user);
+                    System.out.println("Welcome email sent to: " + user.getEmail());
+                } catch (Exception e) {
+                    System.err.println("Email failed but user created: " + e.getMessage());
+                }
+            }).start();
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
-            response.put("message", "User registered successfully. Welcome email sent!");
+            response.put("message", "Account created successfully!");
             response.put("userId", user.getId());
             response.put("email", user.getEmail());
             response.put("name", user.getName());
+
             return ResponseEntity.ok(response);
+
         } catch (RuntimeException e) {
+            System.err.println("Signup error: " + e.getMessage());
             Map<String, Object> error = new HashMap<>();
             error.put("success", false);
             error.put("error", e.getMessage());
@@ -89,5 +93,13 @@ public class AuthController {
             error.put("error", "Invalid email or password");
             return ResponseEntity.status(401).body(error);
         }
+    }
+
+    @GetMapping("/health")
+    public ResponseEntity<Map<String, String>> health() {
+        Map<String, String> response = new HashMap<>();
+        response.put("status", "UP");
+        response.put("message", "Server running");
+        return ResponseEntity.ok(response);
     }
 }

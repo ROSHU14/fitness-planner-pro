@@ -32,7 +32,20 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/api/health", "/").permitAll()
+                        // Allow all static files and pages
+                        .requestMatchers(
+                                "/",
+                                "/index.html",
+                                "/login.html",
+                                "/signup.html",
+                                "/dashboard.html",
+                                "/css/**",
+                                "/js/**",
+                                "/static/**",
+                                "/api/auth/**",
+                                "/api/health"
+                        ).permitAll()
+                        // All other requests need authentication
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
